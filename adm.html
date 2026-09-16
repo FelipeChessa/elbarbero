@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin | E.L Barbero</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="adm-styles.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html" class="logo" target="_blank">
+                    <span class="logo-text">E.L Barbero</span>
+                    <span class="logo-sub">Admin</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="perfil">
+                    <i class="fas fa-user"></i>
+                    <span>Meu Perfil</span>
+                </a>
+                <a href="#" class="nav-item" data-section="imoveis">
+                    <i class="fas fa-building"></i>
+                    <span>Imóveis</span>
+                </a>
+                <a href="#" class="nav-item" data-section="contato">
+                    <i class="fas fa-envelope"></i>
+                    <span>Mensagens</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name">Edison Luis Barbero</span>
+                        <span class="user-role">Administrador</span>
+                    </div>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sair</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="admin-section active">
+                <div class="section-header">
+                    <h1>Dashboard</h1>
+                    <p>Visão geral do seu portfólio imobiliário</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(201, 169, 110, 0.1); color: #c9a96e;">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="totalImoveis">0</span>
+                            <span class="stat-label">Total de Imóveis</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(46, 204, 113, 0.1); color: #2ecc71;">
+                            <i class="fas fa-tag"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="imoveisVenda">0</span>
+                            <span class="stat-label">Para Venda</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(52, 152, 219, 0.1); color: #3498db;">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="imoveisAluguel">0</span>
+                            <span class="stat-label">Para Aluguel</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(155, 89, 182, 0.1); color: #9b59b6;">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="totalVisualizacoes">0</span>
+                            <span class="stat-label">Visualizações</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="recent-activity">
+                    <h2>Atividades Recentes</h2>
+                    <div class="activity-list" id="activityList">
+                        <div class="activity-item">
+                            <div class="activity-icon"><i class="fas fa-plus"></i></div>
+                            <div class="activity-content">
+                                <p>Novo imóvel adicionado</p>
+                                <span>Há 2 horas</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon"><i class="fas fa-edit"></i></div>
+                            <div class="activity-content">
+                                <p>Perfil atualizado</p>
+                                <span>Há 1 dia</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon"><i class="fas fa-image"></i></div>
+                            <div class="activity-content">
+                                <p>3 imagens adicionadas</p>
+                                <span>Há 2 dias</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Perfil Section -->
+            <section id="perfil" class="admin-section">
+                <div class="section-header">
+                    <h1>Meu Perfil</h1>
+                    <p>Gerencie suas informações pessoais</p>
+                </div>
+                <div class="profile-form-container">
+                    <form id="profileForm" class="admin-form">
+                        <div class="form-section">
+                            <h3>Informações Pessoais</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="nome">Nome Completo</label>
+                                    <input type="text" id="nome" name="nome" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nomeEmpresa">Nome da Empresa</label>
+                                    <input type="text" id="nomeEmpresa" name="nomeEmpresa">
+                                </div>
+                                <div class="form-group">
+                                    <label for="creci">CRECI</label>
+                                    <input type="text" id="creci" name="creci" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cnpj">CNPJ</label>
+                                    <input type="text" id="cnpj" name="cnpj">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <h3>Contato</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="telefone">Telefone / WhatsApp</label>
+                                    <input type="tel" id="telefone" name="telefone" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">E-mail</label>
+                                    <input type="email" id="email" name="email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="emailEmpresa">E-mail da Empresa</label>
+                                    <input type="email" id="emailEmpresa" name="emailEmpresa">
+                                </div>
+                                <div class="form-group">
+                                    <label for="regiao">Região de Atuação</label>
+                                    <input type="text" id="regiao" name="regiao" value="Zona Norte - São Paulo">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <h3>Redes Sociais</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="instagram">Instagram</label>
+                                    <input type="text" id="instagram" name="instagram" placeholder="@seuusuario">
+                                </div>
+                                <div class="form-group">
+                                    <label for="facebook">Facebook</label>
+                                    <input type="text" id="facebook" name="facebook" placeholder="https://facebook.com/seuusuario">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <h3>Sobre</h3>
+                            <div class="form-group full-width">
+                                <label for="sobre">Biografia</label>
+                                <textarea id="sobre" name="sobre" rows="5" placeholder="Conte sua história profissional..."></textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save"></i>
+                                Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Imóveis Section -->
+            <section id="imoveis" class="admin-section">
+                <div class="section-header">
+                    <div class="header-content">
+                        <h1>Imóveis</h1>
+                        <p>Gerencie seu catálogo de imóveis</p>
+                    </div>
+                    <button class="btn-primary" id="addPropertyBtn">
+                        <i class="fas fa-plus"></i>
+                        Novo Imóvel
+                    </button>
+                </div>
+                
+                <div class="filters-bar">
+                    <input type="text" id="searchImoveis" placeholder="Buscar imóveis..." class="search-input">
+                    <select id="filterTipo" class="filter-select">
+                        <option value="">Todos os Tipos</option>
+                        <option value="apartamento">Apartamento</option>
+                        <option value="casa">Casa</option>
+                        <option value="comercial">Comercial</option>
+                        <option value="terreno">Terreno</option>
+                    </select>
+                    <select id="filterTransacao" class="filter-select">
+                        <option value="">Todas Transações</option>
+                        <option value="venda">Venda</option>
+                        <option value="aluguel">Aluguel</option>
+                    </select>
+                </div>
+
+                <div class="properties-table-container">
+                    <table class="properties-table">
+                        <thead>
+                            <tr>
+                                <th>Imagem</th>
+                                <th>Título</th>
+                                <th>Tipo</th>
+                                <th>Transação</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="propertiesTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Contato Section -->
+            <section id="contato" class="admin-section">
+                <div class="section-header">
+                    <h1>Mensagens</h1>
+                    <p>Mensagens recebidas pelo site</p>
+                </div>
+                <div class="messages-container">
+                    <div class="message-list" id="messageList">
+                        <div class="empty-state">
+                            <i class="fas fa-envelope-open"></i>
+                            <p>Nenhuma mensagem recebida ainda</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Property Modal -->
+    <div class="modal" id="propertyModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content property-modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Novo Imóvel</h2>
+                <button class="modal-close" id="closePropertyModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="propertyForm" class="property-form">
+                <input type="hidden" id="propertyId">
+                <div class="form-tabs">
+                    <button type="button" class="tab-btn active" data-tab="basico">Dados Básicos</button>
+                    <button type="button" class="tab-btn" data-tab="detalhes">Detalhes</button>
+                    <button type="button" class="tab-btn" data-tab="imagens">Imagens</button>
+                </div>
+                
+                <div class="tab-content active" id="tab-basico">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="propertyTitle">Título do Imóvel *</label>
+                            <input type="text" id="propertyTitle" required placeholder="Ex: Apartamento Moderno em Santana">
+                        </div>
+                        <div class="form-group">
+                            <label for="propertyType">Tipo *</label>
+                            <select id="propertyType" required>
+                                <option value="">Selecione...</option>
+                                <option value="apartamento">Apartamento</option>
+                                <option value="casa">Casa</option>
+                                <option value="comercial">Comercial</option>
+                                <option value="terreno">Terreno</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="propertyTransaction">Transação *</label>
+                            <select id="propertyTransaction" required>
+                                <option value="">Selecione...</option>
+                                <option value="venda">Venda</option>
+                                <option value="aluguel">Aluguel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="propertyPrice">Valor (R$) *</label>
+                            <input type="text" id="propertyPrice" required placeholder="450.000">
+                        </div>
+                        <div class="form-group">
+                            <label for="propertyLocation">Localização *</label>
+                            <input type="text" id="propertyLocation" required placeholder="Santana, São Paulo">
+                        </div>
+                        <div class="form-group">
+                            <label for="propertyStatus">Status</label>
+                            <select id="propertyStatus">
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                                <option value="vendido">Vendido/Alugado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-detalhes">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="propertyBedrooms">Quartos</label>
+                            <input type="number" id="propertyBedrooms" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="propertyBathrooms">Banheiros</label>
+                            <input type="number" id="propertyBathrooms" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="propertySuites">Suítes</label>
+                            <input type="number" id="propertySuites" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="propertyGarage">Vagas de Garagem</label>
+                            <input type="number" id="propertyGarage" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="propertyArea">Área (m²)</label>
+                            <input type="number" id="propertyArea" min="0" placeholder="65">
+                        </div>
+                        <div class="form-group">
+                            <label for="propertyAreaTotal">Área Total (m²)</label>
+                            <input type="number" id="propertyAreaTotal" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="propertyYear">Ano de Construção</label>
+                            <input type="number" id="propertyYear" min="1900" max="2030">
+                        </div>
+                        <div class="form-group">
+                            <label for="propertyCondition">Condição</label>
+                            <select id="propertyCondition">
+                                <option value="novo">Novo</option>
+                                <option value="usado">Usado</option>
+                                <option value="reformado">Reformado</option>
+                                <option value="obra">Em Obra</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="propertyDescription">Descrição</label>
+                            <textarea id="propertyDescription" rows="4" placeholder="Descreva as características do imóvel..."></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="propertyFeatures">Comodidades</label>
+                            <div class="features-grid">
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="piscina">
+                                    <span>Piscina</span>
+                                </label>
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="churrasqueira">
+                                    <span>Churrasqueira</span>
+                                </label>
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="academia">
+                                    <span>Academia</span>
+                                </label>
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="portaria24h">
+                                    <span>Portaria 24h</span>
+                                </label>
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="elevador">
+                                    <span>Elevador</span>
+                                </label>
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="varanda">
+                                    <span>Varanda</span>
+                                </label>
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="areaVerde">
+                                    <span>Área Verde</span>
+                                </label>
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="playground">
+                                    <span>Playground</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-imagens">
+                    <div class="image-upload-area">
+                        <div class="upload-zone" id="uploadZone">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Arraste imagens aqui ou clique para selecionar</p>
+                            <span>PNG, JPG até 5MB cada (máx 10 imagens)</span>
+                            <input type="file" id="imageInput" accept="image/*" multiple hidden>
+                        </div>
+                        <div class="image-preview-grid" id="imagePreviewGrid">
+                        </div>
+                    </div>
+                    <div class="image-url-input">
+                        <label>Ou adicione via URL</label>
+                        <div class="url-input-group">
+                            <input type="url" id="imageUrl" placeholder="https://exemplo.com/imagem.jpg">
+                            <button type="button" id="addImageUrl" class="btn-secondary">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancelProperty">Cancelar</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i>
+                        Salvar Imóvel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content delete-modal">
+            <div class="delete-content">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Confirmar Exclusão</h3>
+                <p>Tem certeza que deseja excluir este imóvel? Esta ação não pode ser desfeita.</p>
+                <div class="delete-actions">
+                    <button class="btn-secondary" id="cancelDelete">Cancelar</button>
+                    <button class="btn-danger" id="confirmDelete">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="adm-script.js"></script>
+</body>
+</html>
