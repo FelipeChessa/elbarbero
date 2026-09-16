@@ -479,10 +479,102 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
+// Map with Google Maps API and KML
+function initMap() {
+    const mapElement = document.getElementById('map');
+    if (!mapElement) return;
+    
+    const zonaNorteCoords = [
+        { lat: -23.5172032, lng: -46.635601 },
+        { lat: -23.5312257, lng: -46.5917493 },
+        { lat: -23.5163447, lng: -46.5811375 },
+        { lat: -23.5027499, lng: -46.5917493 },
+        { lat: -23.468256, lng: -46.5839465 },
+        { lat: -23.4738386, lng: -46.6150016 },
+        { lat: -23.4513636, lng: -46.6419993 },
+        { lat: -23.4651068, lng: -46.6569807 },
+        { lat: -23.506757, lng: -46.7169061 },
+        { lat: -23.5172032, lng: -46.635601 }
+    ];
+    
+    const map = new google.maps.Map(mapElement, {
+        zoom: 11,
+        center: { lat: -23.50, lng: -46.63 },
+        styles: getMapStyles(),
+        disableDefaultUI: false,
+        zoomControl: true,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: true
+    });
+    
+    const zonaNortePolygon = new google.maps.Polygon({
+        paths: zonaNorteCoords,
+        strokeColor: '#c9a96e',
+        strokeOpacity: 1,
+        strokeWeight: 3,
+        fillColor: '#c9a96e',
+        fillOpacity: 0.2
+    });
+    
+    zonaNortePolygon.setMap(map);
+    
+    const bounds = new google.maps.LatLngBounds();
+    zonaNorteCoords.forEach(coord => bounds.extend(coord));
+    map.fitBounds(bounds, 50);
+}
+
+function getMapStyles() {
+    return [
+        { elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a1a" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+        { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#a0a0a0" }] },
+        { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#a0a0a0" }] },
+        { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
+        { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
+        { featureType: "road", elementType: "geometry", stylers: [{ color: "#2d2d2d" }] },
+        { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1a1a1a" }] },
+        { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#a0a0a0" }] },
+        { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#3d3d3d" }] },
+        { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1a1a1a" }] },
+        { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#c9a96e" }] },
+        { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2d2d2d" }] },
+        { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#a0a0a0" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#0d0d0d" }] },
+        { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
+        { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#1a1a1a" }] }
+    ];
+}
+
+// Map Animations with GSAP
+function initMapAnimations() {
+    const mapWrapper = document.querySelector('.map-wrapper');
+    if (!mapWrapper) return;
+    
+    // Animate map section on scroll
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+        gsap.fromTo(mapWrapper, 
+            { opacity: 0, y: 30 },
+            { 
+                opacity: 1, 
+                y: 0, 
+                duration: 0.8, 
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: '.map-section',
+                    start: 'top 70%'
+                }
+            }
+        );
+    }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     initializeSiteData();
     renderProperties();
+    initMapAnimations();
 });
 
 // Favorite button toggle
