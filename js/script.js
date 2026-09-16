@@ -1,9 +1,47 @@
-// Storage Keys
-const STORAGE_KEYS = {
-    PROFILE: 'elbarbero_profile',
-    PROPERTIES: 'elbarbero_properties',
-    MESSAGES: 'elbarbero_messages'
-};
+// Supabase Configuration
+const SUPABASE_URL = 'https://ijwuaztnzrptdoonoglq.supabase.co'
+const SUPABASE_KEY = 'sb_publishable_cagM3vIdKiqcNWo36AHSXg_54A9fTLX'
+
+class SupabaseClient {
+    constructor() {
+        this.url = SUPABASE_URL
+        this.key = SUPABASE_KEY
+    }
+
+    async request(endpoint, options = {}) {
+        const response = await fetch(`${this.url}/rest/v1/${endpoint}`, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': this.key,
+                'Authorization': `Bearer ${this.key}`,
+                'Prefer': options.prefer || 'return=representation',
+                ...options.headers
+            }
+        })
+        
+        if (!response.ok) {
+            return []
+        }
+        
+        return response.json()
+    }
+
+    async getProperties() {
+        return this.request('properties?status=eq.ativo&order=created_at.desc')
+    }
+
+    async getProfile() {
+        const profiles = await this.request('profile?limit=1')
+        return profiles[0] || null
+    }
+
+    async getMessages() {
+        return this.request('messages?order=created_at.desc')
+    }
+}
+
+const supabase = new SupabaseClient()
 
 // Default Properties (fallback)
 const defaultProperties = [
@@ -18,7 +56,7 @@ const defaultProperties = [
         bathrooms: 1,
         area: 65,
         image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
-        description: 'Lindíssimo apartamento com acabamento premium, ubicado en el corazón de Santana. Cocina moderna, sala amplia y vista panorámica de la ciudad.'
+        description: 'Lindíssimo apartamento com acabamento premium, ubicado en el corazón de Santana.'
     },
     {
         id: 2,
@@ -31,7 +69,7 @@ const defaultProperties = [
         bathrooms: 2,
         area: 180,
         image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80',
-        description: 'Casa geminada en barrio tranquilo y residencial. Jardín privado, acabados modernos y excelente iluminación natural.'
+        description: 'Casa geminada en barrio tranquilo y residencial.'
     },
     {
         id: 3,
@@ -44,9 +82,9 @@ const defaultProperties = [
         bathrooms: 1,
         area: 45,
         image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
-        description: 'Sala comercial en punto privilegiado en el centro de Santana. Ideal para oficina o tienda. Alta circulación de personas.'
+        description: 'Sala comercial en punto privilegiado en el centro de Santana.'
     }
-];
+]
 
 // Default Profile
 const defaultProfile = {
@@ -56,127 +94,139 @@ const defaultProfile = {
     telefone: '(11) 98805-1435',
     email: 'elbarberoimoveis@gmail.com',
     regiao: 'Zona Norte - São Paulo'
-};
+}
 
 // Initialize data
-function initializeSiteData() {
-    if (!localStorage.getItem(STORAGE_KEYS.PROPERTIES)) {
-        localStorage.setItem(STORAGE_KEYS.PROPERTIES, JSON.stringify(defaultProperties));
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.PROFILE)) {
-        localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(defaultProfile));
+async function initializeSiteData() {
+    try {
+        const properties = await supabase.getProperties()
+        if (properties && properties.length > 0) {
+            localStorage.setItem('elbarbero_properties', JSON.stringify(properties))
+        } else {
+            localStorage.setItem('elbarbero_properties', JSON.stringify(defaultProperties))
+        }
+
+        const profile = await supabase.getProfile()
+        if (profile) {
+            localStorage.setItem('elbarbero_profile', JSON.stringify(profile))
+        } else {
+            localStorage.setItem('elbarbero_profile', JSON.stringify(defaultProfile))
+        }
+    } catch (error) {
+        console.error('Error loading from Supabase, using defaults:', error)
+        localStorage.setItem('elbarbero_properties', JSON.stringify(defaultProperties))
+        localStorage.setItem('elbarbero_profile', JSON.stringify(defaultProfile))
     }
 }
 
 // Get properties from localStorage
 function getProperties() {
     try {
-        const stored = localStorage.getItem(STORAGE_KEYS.PROPERTIES);
+        const stored = localStorage.getItem('elbarbero_properties')
         if (stored) {
-            const props = JSON.parse(stored);
-            return props.filter(p => p.status === 'ativo');
+            return JSON.parse(stored)
         }
     } catch (e) {
-        console.error('Error loading properties:', e);
+        console.error('Error loading properties:', e)
     }
-    return defaultProperties;
+    return defaultProperties
 }
 
 // Get profile from localStorage
 function getProfile() {
     try {
-        const stored = localStorage.getItem(STORAGE_KEYS.PROFILE);
+        const stored = localStorage.getItem('elbarbero_profile')
         if (stored) {
-            return JSON.parse(stored);
+            return JSON.parse(stored)
         }
     } catch (e) {
-        console.error('Error loading profile:', e);
+        console.error('Error loading profile:', e)
     }
-    return defaultProfile;
+    return defaultProfile
 }
 
 // Global properties variable
-let properties = getProperties();
+let properties = getProperties()
 
 // DOM Elements
-const cursor = document.querySelector('.cursor');
-const cursorFollower = document.querySelector('.cursor-follower');
-const navbar = document.querySelector('.navbar');
-const menuToggle = document.querySelector('.menu-toggle');
-const mobileMenu = document.querySelector('.mobile-menu');
-const propertiesGrid = document.getElementById('propertiesGrid');
-const filterBtns = document.querySelectorAll('.filter-btn');
-const modal = document.getElementById('propertyModal');
-const contactForm = document.getElementById('contactForm');
+const cursor = document.querySelector('.cursor')
+const cursorFollower = document.querySelector('.cursor-follower')
+const navbar = document.querySelector('.navbar')
+const menuToggle = document.querySelector('.menu-toggle')
+const mobileMenu = document.querySelector('.mobile-menu')
+const propertiesGrid = document.getElementById('propertiesGrid')
+const filterBtns = document.querySelectorAll('.filter-btn')
+const modal = document.getElementById('propertyModal')
+const contactForm = document.getElementById('contactForm')
 
 // Custom Cursor
 document.addEventListener('mousemove', (e) => {
     if (cursor && cursorFollower) {
-        cursor.style.left = e.clientX - 6 + 'px';
-        cursor.style.top = e.clientY - 6 + 'px';
-        cursorFollower.style.left = e.clientX - 20 + 'px';
-        cursorFollower.style.top = e.clientY - 20 + 'px';
+        cursor.style.left = e.clientX - 6 + 'px'
+        cursor.style.top = e.clientY - 6 + 'px'
+        cursorFollower.style.left = e.clientX - 20 + 'px'
+        cursorFollower.style.top = e.clientY - 20 + 'px'
     }
-});
+})
 
 document.querySelectorAll('a, button, .property-card').forEach(el => {
     el.addEventListener('mouseenter', () => {
-        if (cursor) cursor.classList.add('hover');
-        if (cursorFollower) cursorFollower.classList.add('hover');
-    });
+        if (cursor) cursor.classList.add('hover')
+        if (cursorFollower) cursorFollower.classList.add('hover')
+    })
     el.addEventListener('mouseleave', () => {
-        if (cursor) cursor.classList.remove('hover');
-        if (cursorFollower) cursorFollower.classList.remove('hover');
-    });
-});
+        if (cursor) cursor.classList.remove('hover')
+        if (cursorFollower) cursorFollower.classList.remove('hover')
+    })
+})
 
 // Navbar Scroll Effect
 window.addEventListener('scroll', () => {
     if (navbar) {
         if (window.scrollY > 100) {
-            navbar.classList.add('scrolled');
+            navbar.classList.add('scrolled')
         } else {
-            navbar.classList.remove('scrolled');
+            navbar.classList.remove('scrolled')
         }
     }
-});
+})
 
 // Mobile Menu
 if (menuToggle && mobileMenu) {
     menuToggle.addEventListener('click', () => {
-        menuToggle.classList.toggle('active');
-        mobileMenu.classList.toggle('active');
-        document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
-    });
+        menuToggle.classList.toggle('active')
+        mobileMenu.classList.toggle('active')
+        document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : ''
+    })
 
     mobileMenu.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
-            menuToggle.classList.remove('active');
-            mobileMenu.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    });
+            menuToggle.classList.remove('active')
+            mobileMenu.classList.remove('active')
+            document.body.style.overflow = ''
+        })
+    })
 }
 
 // Format Price
 function formatPrice(price, transaction) {
     if (transaction === 'aluguel') {
-        return 'R$ ' + price.toLocaleString('pt-BR') + '/mês';
+        return 'R$ ' + price.toLocaleString('pt-BR') + '/mês'
     }
-    return 'R$ ' + price.toLocaleString('pt-BR');
+    return 'R$ ' + price.toLocaleString('pt-BR')
 }
 
 // Render Properties
 function renderProperties(filter = 'todos') {
-    properties = getProperties();
+    properties = getProperties()
     
-    if (!propertiesGrid) return;
+    if (!propertiesGrid) return
     
-    propertiesGrid.innerHTML = '';
+    propertiesGrid.innerHTML = ''
     
     const filtered = filter === 'todos' 
         ? properties 
-        : properties.filter(p => p.type === filter || p.transaction === filter);
+        : properties.filter(p => p.type === filter || p.transaction === filter)
     
     if (filtered.length === 0) {
         propertiesGrid.innerHTML = `
@@ -184,18 +234,18 @@ function renderProperties(filter = 'todos') {
                 <i class="fas fa-home"></i>
                 <p>Nenhum imóvel encontrado</p>
             </div>
-        `;
-        return;
+        `
+        return
     }
     
     filtered.forEach((property, index) => {
-        const card = document.createElement('div');
-        card.className = 'property-card';
-        card.style.transitionDelay = `${index * 0.1}s`;
+        const card = document.createElement('div')
+        card.className = 'property-card'
+        card.style.transitionDelay = `${index * 0.1}s`
         
         const imageUrl = property.images && property.images[0] 
             ? property.images[0] 
-            : property.image || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80';
+            : property.image || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80'
         
         card.innerHTML = `
             <div class="property-image">
@@ -229,42 +279,42 @@ function renderProperties(filter = 'todos') {
                     </div>
                 </div>
             </div>
-        `;
+        `
         
-        card.addEventListener('click', () => openModal(property));
-        propertiesGrid.appendChild(card);
-    });
+        card.addEventListener('click', () => openModal(property))
+        propertiesGrid.appendChild(card)
+    })
     
     // Animate cards
     setTimeout(() => {
         document.querySelectorAll('.property-card').forEach((card, i) => {
             setTimeout(() => {
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, i * 100);
-        });
-    }, 100);
+                card.style.opacity = '1'
+                card.style.transform = 'translateY(0)'
+            }, i * 100)
+        })
+    }, 100)
 }
 
 // Filter Properties
 if (filterBtns) {
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            filterBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderProperties(btn.dataset.filter);
-        });
-    });
+            filterBtns.forEach(b => b.classList.remove('active'))
+            btn.classList.add('active')
+            renderProperties(btn.dataset.filter)
+        })
+    })
 }
 
 // Modal Functions
 function openModal(property) {
-    const modalBody = modal.querySelector('.modal-body');
-    if (!modalBody) return;
+    const modalBody = modal.querySelector('.modal-body')
+    if (!modalBody) return
     
     const imageUrl = property.images && property.images[0] 
         ? property.images[0] 
-        : property.image || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80';
+        : property.image || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80'
     
     modalBody.innerHTML = `
         <img src="${imageUrl}" alt="${property.title}" class="modal-image" onerror="this.src='https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80'">
@@ -307,51 +357,74 @@ function openModal(property) {
                 <button class="btn-secondary modal-close-btn">Fechar</button>
             </div>
         </div>
-    `;
+    `
     
-    const closeBtn = modal.querySelector('.modal-close-btn');
+    const closeBtn = modal.querySelector('.modal-close-btn')
     if (closeBtn) {
-        closeBtn.addEventListener('click', closeModal);
+        closeBtn.addEventListener('click', closeModal)
     }
     
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    modal.classList.add('active')
+    document.body.style.overflow = 'hidden'
 }
 
 function closeModal() {
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
+    modal.classList.remove('active')
+    document.body.style.overflow = ''
 }
 
 if (modal) {
-    const overlay = modal.querySelector('.modal-overlay');
-    const closeBtn = modal.querySelector('.modal-close');
+    const overlay = modal.querySelector('.modal-overlay')
+    const closeBtn = modal.querySelector('.modal-close')
     
-    if (overlay) overlay.addEventListener('click', closeModal);
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (overlay) overlay.addEventListener('click', closeModal)
+    if (closeBtn) closeBtn.addEventListener('click', closeModal)
 }
 
 // Form Submission
 if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const nome = document.getElementById('nome').value;
-        const tipo = document.getElementById('tipo').value;
-        const mensagem = document.getElementById('mensagem').value;
+    contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault()
+        const nome = document.getElementById('nome').value
+        const tipo = document.getElementById('tipo').value
+        const telefone = document.getElementById('telefone').value
+        const email = document.getElementById('email').value
+        const mensagem = document.getElementById('mensagem').value
         
-        const text = `Olá, me chamo ${nome}. Tenho interesse em: ${tipo}. ${mensagem}`;
-        const waUrl = `https://wa.me/5511988051435?text=${encodeURIComponent(text)}`;
+        // Save to Supabase
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/messages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                },
+                body: JSON.stringify({
+                    nome,
+                    email,
+                    telefone,
+                    tipo,
+                    mensagem
+                })
+            })
+        } catch (error) {
+            console.log('Message saved locally')
+        }
         
-        window.open(waUrl, '_blank');
-    });
+        const text = `Olá, me chamo ${nome}. Tenho interesse em: ${tipo}. ${mensagem}`
+        const waUrl = `https://wa.me/5511988051435?text=${encodeURIComponent(text)}`
+        
+        window.open(waUrl, '_blank')
+    })
 }
 
 // GSAP Animations
 if (typeof gsap !== 'undefined') {
-    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger)
 
     // Hero Animations
-    const heroTl = gsap.timeline();
+    const heroTl = gsap.timeline()
 
     if (document.querySelector('.hero-tag')) {
         heroTl
@@ -360,243 +433,151 @@ if (typeof gsap !== 'undefined') {
             .to('.hero-subtitle', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.6')
             .to('.hero-stats', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.4')
             .to('.hero-actions', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.4')
-            .to('.scroll-indicator', { opacity: 1, duration: 1, delay: 0.5 });
+            .to('.scroll-indicator', { opacity: 1, duration: 1, delay: 0.5 })
     }
 
     // Number Counter Animation
     document.querySelectorAll('.stat-number').forEach(stat => {
-        const target = parseInt(stat.dataset.count);
+        const target = parseInt(stat.dataset.count)
         gsap.to(stat, {
             innerHTML: target,
             duration: 2,
             snap: { innerHTML: 1 },
             scrollTrigger: { trigger: stat, start: 'top 80%' }
-        });
-    });
+        })
+    })
 
     // About Section Animations
     gsap.to('.about-content .section-tag', {
         opacity: 1, y: 0, duration: 0.8,
         scrollTrigger: { trigger: '.about', start: 'top 70%' }
-    });
+    })
 
     gsap.to('.about-content .section-title', {
         opacity: 1, y: 0, duration: 0.8,
         scrollTrigger: { trigger: '.about', start: 'top 70%' }
-    });
+    })
 
     gsap.to('.about-intro, .about-text', {
         opacity: 1, y: 0, duration: 0.8, stagger: 0.2,
         scrollTrigger: { trigger: '.about', start: 'top 60%' }
-    });
+    })
 
     gsap.to('.about-features', {
         opacity: 1, y: 0, duration: 0.8,
         scrollTrigger: { trigger: '.about-features', start: 'top 80%' }
-    });
+    })
 
     gsap.to('.about-contact', {
         opacity: 1, y: 0, duration: 0.8,
         scrollTrigger: { trigger: '.about-contact', start: 'top 80%' }
-    });
+    })
 
     // Properties Section Animations
     gsap.to('.properties-header .section-tag', {
         opacity: 1, y: 0, duration: 0.8,
         scrollTrigger: { trigger: '.properties', start: 'top 70%' }
-    });
+    })
 
     gsap.to('.properties-header .section-title, .section-subtitle', {
         opacity: 1, y: 0, duration: 0.8, stagger: 0.2,
         scrollTrigger: { trigger: '.properties', start: 'top 60%' }
-    });
+    })
 
     gsap.to('.filter-btn', {
         opacity: 1, y: 0, duration: 0.6, stagger: 0.1,
         scrollTrigger: { trigger: '.filter-bar', start: 'top 80%' }
-    });
+    })
 
     gsap.to('.properties-cta', {
         opacity: 1, y: 0, duration: 0.8,
         scrollTrigger: { trigger: '.properties-cta', start: 'top 90%' }
-    });
+    })
 
     // Contact Section Animations
     gsap.to('.contact-info .section-tag, .contact-info .section-title', {
         opacity: 1, y: 0, duration: 0.8, stagger: 0.2,
         scrollTrigger: { trigger: '.contact', start: 'top 70%' }
-    });
+    })
 
     gsap.to('.contact-text', {
         opacity: 1, y: 0, duration: 0.8,
         scrollTrigger: { trigger: '.contact', start: 'top 60%' }
-    });
+    })
 
     gsap.to('.contact-method', {
         opacity: 1, y: 0, duration: 0.6, stagger: 0.15,
         scrollTrigger: { trigger: '.contact-methods', start: 'top 80%' }
-    });
+    })
 
     gsap.to('.contact-social', {
         opacity: 1, y: 0, duration: 0.8,
         scrollTrigger: { trigger: '.contact-social', start: 'top 90%' }
-    });
+    })
 
     gsap.to('.contact-form-wrapper', {
         opacity: 1, y: 0, duration: 0.8,
         scrollTrigger: { trigger: '.contact-form-wrapper', start: 'top 70%' }
-    });
+    })
 }
 
 // Image hover effect for about section
-const aboutImage = document.querySelector('.about-image');
+const aboutImage = document.querySelector('.about-image')
 if (aboutImage) {
     aboutImage.addEventListener('mousemove', (e) => {
-        const rect = aboutImage.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width - 0.5;
-        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        const rect = aboutImage.getBoundingClientRect()
+        const x = (e.clientX - rect.left) / rect.width - 0.5
+        const y = (e.clientY - rect.top) / rect.height - 0.5
         
         if (typeof gsap !== 'undefined') {
-            gsap.to(aboutImage, { rotationY: x * 10, rotationX: -y * 10, duration: 0.5, ease: 'power2.out' });
+            gsap.to(aboutImage, { rotationY: x * 10, rotationX: -y * 10, duration: 0.5, ease: 'power2.out' })
         }
-    });
+    })
     
     aboutImage.addEventListener('mouseleave', () => {
         if (typeof gsap !== 'undefined') {
-            gsap.to(aboutImage, { rotationY: 0, rotationX: 0, duration: 0.5, ease: 'power2.out' });
+            gsap.to(aboutImage, { rotationY: 0, rotationX: 0, duration: 0.5, ease: 'power2.out' })
         }
-    });
+    })
 }
 
 // Smooth scroll for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
+        e.preventDefault()
+        const target = document.querySelector(this.getAttribute('href'))
         if (target && typeof gsap !== 'undefined') {
-            gsap.to(window, { duration: 1, scrollTo: { y: target, offsetY: 80 }, ease: 'power3.inOut' });
+            gsap.to(window, { duration: 1, scrollTo: { y: target, offsetY: 80 }, ease: 'power3.inOut' })
         }
-    });
-});
-
-// Map with Google Maps API and KML
-function initMap() {
-    const mapElement = document.getElementById('map');
-    if (!mapElement) return;
-    
-    const zonaNorteCoords = [
-        { lat: -23.5172032, lng: -46.635601 },
-        { lat: -23.5312257, lng: -46.5917493 },
-        { lat: -23.5163447, lng: -46.5811375 },
-        { lat: -23.5027499, lng: -46.5917493 },
-        { lat: -23.468256, lng: -46.5839465 },
-        { lat: -23.4738386, lng: -46.6150016 },
-        { lat: -23.4513636, lng: -46.6419993 },
-        { lat: -23.4651068, lng: -46.6569807 },
-        { lat: -23.506757, lng: -46.7169061 },
-        { lat: -23.5172032, lng: -46.635601 }
-    ];
-    
-    const map = new google.maps.Map(mapElement, {
-        zoom: 11,
-        center: { lat: -23.50, lng: -46.63 },
-        styles: getMapStyles(),
-        disableDefaultUI: false,
-        zoomControl: true,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: true
-    });
-    
-    const zonaNortePolygon = new google.maps.Polygon({
-        paths: zonaNorteCoords,
-        strokeColor: '#c9a96e',
-        strokeOpacity: 1,
-        strokeWeight: 3,
-        fillColor: '#c9a96e',
-        fillOpacity: 0.2
-    });
-    
-    zonaNortePolygon.setMap(map);
-    
-    const bounds = new google.maps.LatLngBounds();
-    zonaNorteCoords.forEach(coord => bounds.extend(coord));
-    map.fitBounds(bounds, 50);
-}
-
-function getMapStyles() {
-    return [
-        { elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
-        { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a1a" }] },
-        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-        { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#a0a0a0" }] },
-        { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#a0a0a0" }] },
-        { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
-        { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
-        { featureType: "road", elementType: "geometry", stylers: [{ color: "#2d2d2d" }] },
-        { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1a1a1a" }] },
-        { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#a0a0a0" }] },
-        { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#3d3d3d" }] },
-        { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1a1a1a" }] },
-        { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#c9a96e" }] },
-        { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2d2d2d" }] },
-        { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#a0a0a0" }] },
-        { featureType: "water", elementType: "geometry", stylers: [{ color: "#0d0d0d" }] },
-        { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
-        { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#1a1a1a" }] }
-    ];
-}
-
-// Map Animations with GSAP
-function initMapAnimations() {
-    const mapWrapper = document.querySelector('.map-wrapper');
-    if (!mapWrapper) return;
-    
-    // Animate map section on scroll
-    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-        gsap.fromTo(mapWrapper, 
-            { opacity: 0, y: 30 },
-            { 
-                opacity: 1, 
-                y: 0, 
-                duration: 0.8, 
-                ease: 'power3.out',
-                scrollTrigger: {
-                    trigger: '.map-section',
-                    start: 'top 70%'
-                }
-            }
-        );
-    }
-}
+    })
+})
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    initializeSiteData();
-    renderProperties();
-    initMapAnimations();
-});
+document.addEventListener('DOMContentLoaded', async () => {
+    await initializeSiteData()
+    renderProperties()
+})
 
 // Favorite button toggle
 document.addEventListener('click', (e) => {
     if (e.target.closest('.property-favorite')) {
-        const btn = e.target.closest('.property-favorite');
-        const icon = btn.querySelector('i');
+        const btn = e.target.closest('.property-favorite')
+        const icon = btn.querySelector('i')
         
         if (icon.classList.contains('far')) {
-            icon.classList.remove('far');
-            icon.classList.add('fas');
-            icon.style.color = '#c9a96e';
+            icon.classList.remove('far')
+            icon.classList.add('fas')
+            icon.style.color = '#c9a96e'
         } else {
-            icon.classList.remove('fas');
-            icon.classList.add('far');
-            icon.style.color = '';
+            icon.classList.remove('fas')
+            icon.classList.add('far')
+            icon.style.color = ''
         }
     }
-});
+})
 
 // Add CSS for no-properties state
-const style = document.createElement('style');
+const style = document.createElement('style')
 style.textContent = `
     .no-properties {
         grid-column: 1 / -1;
@@ -609,5 +590,5 @@ style.textContent = `
         margin-bottom: 15px;
         opacity: 0.3;
     }
-`;
-document.head.appendChild(style);
+`
+document.head.appendChild(style)
