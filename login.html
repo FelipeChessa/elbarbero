@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | E.L Barbero Admin</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/adm-styles.css">
     <style>
         :root {
             --primary: #1a1a1a;
@@ -19,16 +16,11 @@
             --bg-dark: #0d0d0d;
             --bg-card: #151515;
             --danger: #e74c3c;
-            --success: #2ecc71;
             --font-display: 'Playfair Display', Georgia, serif;
             --font-body: 'Inter', -apple-system, sans-serif;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: var(--font-body);
@@ -40,21 +32,13 @@
             justify-content: center;
         }
 
-        .login-container {
-            width: 100%;
-            max-width: 450px;
-            padding: 40px;
-        }
+        .login-container { width: 100%; max-width: 450px; padding: 40px; }
 
         .login-card {
             background: var(--bg-card);
             border: 1px solid rgba(201, 169, 110, 0.2);
             padding: 50px 40px;
             text-align: center;
-        }
-
-        .login-logo {
-            margin-bottom: 40px;
         }
 
         .login-logo .logo-text {
@@ -72,31 +56,11 @@
             margin-top: 5px;
         }
 
-        .login-title {
-            font-family: var(--font-display);
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-        }
+        .login-title { font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 10px; }
+        .login-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 30px; }
 
-        .login-subtitle {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-bottom: 8px; }
         .form-group input {
             width: 100%;
             padding: 14px 16px;
@@ -105,17 +69,8 @@
             color: var(--text);
             font-family: var(--font-body);
             font-size: 1rem;
-            transition: all 0.3s ease;
         }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .form-group input::placeholder {
-            color: var(--text-muted);
-        }
+        .form-group input:focus { outline: none; border-color: var(--accent); }
 
         .btn-primary {
             display: flex;
@@ -133,34 +88,11 @@
             transition: all 0.3s ease;
             margin-bottom: 20px;
         }
+        .btn-primary:hover { background: var(--accent-light); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .btn-primary:hover {
-            background: var(--accent-light);
-            transform: translateY(-2px);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 25px 0;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.1);
-        }
+        .divider { display: flex; align-items: center; gap: 15px; margin: 25px 0; color: var(--text-muted); font-size: 0.85rem; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1); }
 
         .btn-google {
             display: flex;
@@ -175,17 +107,8 @@
             font-size: 1rem;
             border: none;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
-
-        .btn-google:hover {
-            background: #357ae8;
-            transform: translateY(-2px);
-        }
-
-        .btn-google i {
-            font-size: 1.2rem;
-        }
+        .btn-google:hover { background: #357ae8; }
 
         .error-message {
             background: rgba(231, 76, 60, 0.1);
@@ -196,66 +119,20 @@
             margin-bottom: 20px;
             display: none;
         }
+        .error-message.show { display: block; }
 
-        .error-message.show {
-            display: block;
-        }
+        .back-link { margin-top: 30px; color: var(--text-muted); font-size: 0.9rem; }
+        .back-link a { color: var(--accent); text-decoration: none; }
 
-        .back-link {
-            margin-top: 30px;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
+        .register-link { margin-top: 20px; color: var(--text-muted); font-size: 0.9rem; }
+        .register-link a { color: var(--accent); text-decoration: none; cursor: pointer; }
 
-        .back-link a {
-            color: var(--accent);
-            text-decoration: none;
-        }
+        .signup-form { display: none; }
+        .signup-form.show { display: block; }
+        .login-form.hidden { display: none; }
 
-        .back-link a:hover {
-            text-decoration: underline;
-        }
-
-        .loading-spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--primary);
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .register-link {
-            margin-top: 20px;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .register-link a {
-            color: var(--accent);
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-
-        .signup-form {
-            display: none;
-        }
-
-        .signup-form.show {
-            display: block;
-        }
-
-        .login-form.hidden {
-            display: none;
-        }
+        .loading { width: 20px; height: 20px; border: 2px solid var(--primary); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -271,7 +148,6 @@
 
             <div class="error-message" id="errorMessage"></div>
 
-            <!-- Login Form -->
             <form class="login-form" id="loginForm">
                 <div class="form-group">
                     <label for="email">E-mail</label>
@@ -286,7 +162,6 @@
                 </button>
             </form>
 
-            <!-- Signup Form -->
             <form class="signup-form" id="signupForm">
                 <div class="form-group">
                     <label for="signupEmail">E-mail</label>
@@ -325,94 +200,93 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase.js"></script>
     <script>
-        const loginForm = document.getElementById('loginForm')
-        const signupForm = document.getElementById('signupForm')
-        const errorMessage = document.getElementById('errorMessage')
-        const loginBtn = document.getElementById('loginBtn')
-        const signupBtn = document.getElementById('signupBtn')
-        const googleBtn = document.getElementById('googleBtn')
-        const formTitle = document.getElementById('formTitle')
-        const formSubtitle = document.getElementById('formSubtitle')
-        const registerLink = document.getElementById('registerLink')
-        const loginLink = document.getElementById('loginLink')
+        const SUPABASE_URL = 'https://ijwuaztnzrptdoonoglq.supabase.co'
+        const SUPABASE_KEY = 'sb_publishable_cagM3vIdKiqcNWo36AHSXg_54A9fTLX'
 
-        document.getElementById('showSignup').addEventListener('click', () => {
-            loginForm.classList.add('hidden')
-            signupForm.classList.add('show')
-            formTitle.textContent = 'Criar Conta'
-            formSubtitle.textContent = 'Cadastre-se para acessar o admin'
-            registerLink.style.display = 'none'
-            loginLink.style.display = 'block'
-            hideError()
-        })
-
-        document.getElementById('showLogin').addEventListener('click', () => {
-            signupForm.classList.remove('show')
-            loginForm.classList.remove('hidden')
-            formTitle.textContent = 'Entrar'
-            formSubtitle.textContent = 'Acesse o painel administrativo'
-            registerLink.style.display = 'block'
-            loginLink.style.display = 'none'
-            hideError()
-        })
-
-        function showError(message) {
-            errorMessage.textContent = message
-            errorMessage.classList.add('show')
+        function showError(msg) {
+            document.getElementById('errorMessage').textContent = msg
+            document.getElementById('errorMessage').classList.add('show')
         }
 
         function hideError() {
-            errorMessage.classList.remove('show')
+            document.getElementById('errorMessage').classList.remove('show')
         }
 
         function setLoading(btn, loading) {
-            if (loading) {
-                btn.innerHTML = '<div class="loading-spinner"></div>'
-                btn.disabled = true
-            } else {
-                btn.innerHTML = btn.id === 'loginBtn' ? '<span>Entrar</span>' : '<span>Criar Conta</span>'
-                btn.disabled = false
-            }
+            btn.disabled = loading
+            btn.innerHTML = loading ? '<div class="loading"></div>' : (btn.id === 'loginBtn' ? '<span>Entrar</span>' : '<span>Criar Conta</span>')
+        }
+
+        // Toggle forms
+        document.getElementById('showSignup').onclick = () => {
+            document.getElementById('loginForm').classList.add('hidden')
+            document.getElementById('signupForm').classList.add('show')
+            document.getElementById('formTitle').textContent = 'Criar Conta'
+            document.getElementById('formSubtitle').textContent = 'Cadastre-se para acessar'
+            document.getElementById('registerLink').style.display = 'none'
+            document.getElementById('loginLink').style.display = 'block'
+            hideError()
+        }
+
+        document.getElementById('showLogin').onclick = () => {
+            document.getElementById('signupForm').classList.remove('show')
+            document.getElementById('loginForm').classList.remove('hidden')
+            document.getElementById('formTitle').textContent = 'Entrar'
+            document.getElementById('formSubtitle').textContent = 'Acesse o painel administrativo'
+            document.getElementById('registerLink').style.display = 'block'
+            document.getElementById('loginLink').style.display = 'none'
+            hideError()
         }
 
         // Check if already logged in
-        window.supabaseAuth.getSession().then(({ session, error }) => {
-            if (session) {
-                window.location.href = 'adm.html'
-            }
-        })
+        if (localStorage.getItem('supabase_token')) {
+            window.location.href = 'adm.html'
+        }
 
-        // Login with email/password
-        loginForm.addEventListener('submit', async (e) => {
+        // Login
+        document.getElementById('loginForm').onsubmit = async (e) => {
             e.preventDefault()
             hideError()
-            setLoading(loginBtn, true)
-
+            const btn = document.getElementById('loginBtn')
             const email = document.getElementById('email').value
             const password = document.getElementById('password').value
 
-            const { data, error } = await window.supabaseAuth.signInWithEmail(email, password)
+            setLoading(btn, true)
 
-            setLoading(loginBtn, false)
+            try {
+                const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+                    body: JSON.stringify({ email, password })
+                })
 
-            if (error) {
-                showError(error.message)
-            } else if (data?.session) {
-                window.location.href = 'adm.html'
+                const data = await response.json()
+                console.log('Login response:', data)
+
+                if (data.access_token) {
+                    localStorage.setItem('supabase_token', data.access_token)
+                    localStorage.setItem('supabase_user', JSON.stringify(data.user))
+                    window.location.href = 'adm.html'
+                } else {
+                    showError(data.error_description || 'E-mail ou senha incorretos')
+                }
+            } catch (err) {
+                showError('Erro de conexão: ' + err.message)
             }
-        })
+
+            setLoading(btn, false)
+        }
 
         // Signup
-        signupForm.addEventListener('submit', async (e) => {
+        document.getElementById('signupForm').onsubmit = async (e) => {
             e.preventDefault()
             hideError()
 
             const email = document.getElementById('signupEmail').value
             const password = document.getElementById('signupPassword').value
             const confirmPassword = document.getElementById('confirmPassword').value
+            const btn = document.getElementById('signupBtn')
 
             if (password !== confirmPassword) {
                 showError('As senhas não coincidem')
@@ -424,37 +298,36 @@
                 return
             }
 
-            setLoading(signupBtn, true)
+            setLoading(btn, true)
 
-            const { data, error } = await window.supabaseAuth.signUp(email, password)
+            try {
+                const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+                    body: JSON.stringify({ email, password })
+                })
 
-            setLoading(signupBtn, false)
+                const data = await response.json()
+                console.log('Signup response:', data)
 
-            if (error) {
-                showError(error.message)
-            } else {
-                alert('Conta criada com sucesso! Verifique seu e-mail para confirmar o cadastro.')
-                document.getElementById('showLogin').click()
+                if (response.ok) {
+                    alert('Conta criada! Verifique seu e-mail para confirmar.')
+                    document.getElementById('showLogin').click()
+                } else {
+                    showError(data.msg || 'Erro ao criar conta')
+                }
+            } catch (err) {
+                showError('Erro: ' + err.message)
             }
-        })
 
-        // Login with Google
-        googleBtn.addEventListener('click', async () => {
-            setLoading(googleBtn, true)
-            const { data, error } = await window.supabaseAuth.signInWithGoogle()
-            
-            if (error) {
-                setLoading(googleBtn, false)
-                showError(error.message)
-            }
-        })
+            setLoading(btn, false)
+        }
 
-        // Listen for auth changes
-        window.supabaseAuth.onAuthStateChange((event, session) => {
-            if (session) {
-                window.location.href = 'adm.html'
-            }
-        })
+        // Google Login
+        document.getElementById('googleBtn').onclick = () => {
+            const redirectUrl = encodeURIComponent(window.location.origin + '/adm.html')
+            window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectUrl}`
+        }
     </script>
 </body>
 </html>

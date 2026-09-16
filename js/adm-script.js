@@ -1,142 +1,21 @@
-// Supabase Auth Configuration
+// Supabase Configuration
 const SUPABASE_URL = 'https://ijwuaztnzrptdoonoglq.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_cagM3vIdKiqcNWo36AHSXg_54A9fTLX'
 
-class SupabaseClient {
-    constructor() {
-        this.url = SUPABASE_URL
-        this.key = SUPABASE_KEY
-    }
-
-    async request(endpoint, options = {}) {
-        const response = await fetch(`${this.url}/rest/v1/${endpoint}`, {
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': this.key,
-                'Authorization': `Bearer ${localStorage.getItem('supabase_token') || this.key}`,
-                'Prefer': options.prefer || 'return=representation',
-                ...options.headers
-            }
-        })
-        
-        if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.message || 'Request failed')
-        }
-        
-        return response.json()
-    }
-
-    // Properties
-    async getProperties() {
-        return this.request('properties?status=eq.ativo&order=created_at.desc')
-    }
-
-    async getAllProperties() {
-        return this.request('properties?order=created_at.desc')
-    }
-
-    async createProperty(property) {
-        return this.request('properties', {
-            method: 'POST',
-            body: JSON.stringify(property)
-        })
-    }
-
-    async updateProperty(id, property) {
-        return this.request(`properties?id=eq.${id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(property)
-        })
-    }
-
-    async deleteProperty(id) {
-        return this.request(`properties?id=eq.${id}`, {
-            method: 'DELETE'
-        })
-    }
-
-    // Profile
-    async getProfile() {
-        const profiles = await this.request('profile?limit=1')
-        return profiles[0] || null
-    }
-
-    async updateProfile(profile) {
-        const existing = await this.getProfile()
-        if (existing) {
-            return this.request(`profile?id=eq.${existing.id}`, {
-                method: 'PATCH',
-                body: JSON.stringify(profile)
-            })
-        } else {
-            return this.request('profile', {
-                method: 'POST',
-                body: JSON.stringify(profile)
-            })
-        }
-    }
-
-    // Messages
-    async getMessages() {
-        return this.request('messages?order=created_at.desc')
-    }
-
-    async createMessage(message) {
-        return this.request('messages', {
-            method: 'POST',
-            body: JSON.stringify(message)
-        })
-    }
-}
-
-const supabase = new SupabaseClient()
-
 // Auth functions
 async function signInWithEmail(email, password) {
+    console.log('Login with:', email)
     const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_KEY
-        },
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
         body: JSON.stringify({ email, password })
     })
-    
     const data = await response.json()
-    
     if (data.access_token) {
         localStorage.setItem('supabase_token', data.access_token)
         localStorage.setItem('supabase_user', JSON.stringify(data.user))
     }
-    
     return { data, error: response.ok ? null : data }
-}
-
-async function signInWithGoogle() {
-    const response = await fetch(`${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(window.location.origin + '/adm.html')}`, {
-        method: 'GET',
-        headers: {
-            'apikey': SUPABASE_KEY
-        }
-    })
-    
-    const data = await response.json()
-    return { data, error: response.ok ? null : data }
-}
-
-async function signUp(email, password) {
-    const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_KEY
-        },
-        body: JSON.stringify({ email, password })
-    })
-    
-    return response.json()
 }
 
 async function signOut() {
@@ -145,21 +24,6 @@ async function signOut() {
     window.location.href = 'login.html'
 }
 
-async function getCurrentUser() {
-    const token = localStorage.getItem('supabase_token')
-    if (!token) return null
-    
-    const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-        headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${token}`
-        }
-    })
-    
-    return response.ok ? response.json() : null
-}
-
-// Check auth on page load
 async function checkAuth() {
     const token = localStorage.getItem('supabase_token')
     if (!token) {
@@ -169,24 +33,118 @@ async function checkAuth() {
     return true
 }
 
-// DOM Elements
-const navItems = document.querySelectorAll('.nav-item')
-const adminSections = document.querySelectorAll('.admin-section')
-const profileForm = document.getElementById('profileForm')
-const propertyModal = document.getElementById('propertyModal')
-const propertyForm = document.getElementById('propertyForm')
-const deleteModal = document.getElementById('deleteModal')
-const toastContainer = document.getElementById('toastContainer')
-const uploadZone = document.getElementById('uploadZone')
-const imageInput = document.getElementById('imageInput')
-const imagePreviewGrid = document.getElementById('imagePreviewGrid')
+// Database Helper
+async function dbQuery(endpoint, options = {}) {
+    const token = localStorage.getItem('supabase_token') || SUPABASE_KEY
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${token}`,
+            'Prefer': options.prefer || 'return=representation',
+            ...options.headers
+        }
+    })
+    
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        console.error('DB Error:', error)
+        throw new Error(error.message || 'Request failed')
+    }
+    
+    const text = await response.text()
+    return text ? JSON.parse(text) : []
+}
 
-let currentImages = []
-let deletePropertyId = null
+// Properties CRUD
+const propertiesAPI = {
+    async getAll() {
+        return dbQuery('properties?order=created_at.desc')
+    },
+    async getActive() {
+        return dbQuery('properties?status=eq.ativo&order=created_at.desc')
+    },
+    async create(data) {
+        return dbQuery('properties', {
+            method: 'POST',
+            body: JSON.stringify({ ...data, created_at: new Date().toISOString() })
+        })
+    },
+    async update(id, data) {
+        return dbQuery(`properties?id=eq.${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ ...data, updated_at: new Date().toISOString() })
+        })
+    },
+    async delete(id) {
+        return dbQuery(`properties?id=eq.${id}`, { method: 'DELETE' })
+    }
+}
+
+// Profile CRUD
+const profileAPI = {
+    async get() {
+        const data = await dbQuery('profile?limit=1')
+        return data[0] || null
+    },
+    async update(data) {
+        const existing = await this.get()
+        if (existing) {
+            return dbQuery(`profile?id=eq.${existing.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify(data)
+            })
+        } else {
+            return dbQuery('profile', { method: 'POST', body: JSON.stringify(data) })
+        }
+    }
+}
+
+// Messages CRUD
+const messagesAPI = {
+    async getAll() {
+        return dbQuery('messages?order=created_at.desc')
+    },
+    async create(data) {
+        return dbQuery('messages', {
+            method: 'POST',
+            body: JSON.stringify({ ...data, created_at: new Date().toISOString() })
+        })
+    }
+}
+
+// Toast notification
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer')
+    const toast = document.createElement('div')
+    toast.className = `toast ${type}`
+    
+    const icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-circle' }
+    toast.innerHTML = `
+        <i class="fas ${icons[type]}"></i>
+        <p>${message}</p>
+        <button class="close-toast"><i class="fas fa-times"></i></button>
+    `
+    
+    toast.querySelector('.close-toast').onclick = () => toast.remove()
+    container.appendChild(toast)
+    setTimeout(() => toast.remove(), 5000)
+}
+
+// Format price
+function formatPrice(price, transaction) {
+    const val = parseFloat(price || 0)
+    if (transaction === 'aluguel') return 'R$ ' + val.toLocaleString('pt-BR') + '/mês'
+    return 'R$ ' + val.toLocaleString('pt-BR')
+}
 
 // Navigation
+const navItems = document.querySelectorAll('.nav-item')
+const adminSections = document.querySelectorAll('.admin-section')
+
 navItems.forEach(item => {
-    item.addEventListener('click', (e) => {
+    item.onclick = (e) => {
         e.preventDefault()
         const section = item.dataset.section
         
@@ -196,17 +154,17 @@ navItems.forEach(item => {
         adminSections.forEach(s => s.classList.remove('active'))
         document.getElementById(section).classList.add('active')
         
-        if (section === 'dashboard') updateDashboard()
+        if (section === 'dashboard') loadDashboard()
         if (section === 'perfil') loadProfile()
-        if (section === 'imoveis') renderPropertiesTable()
-        if (section === 'contato') renderMessages()
-    })
+        if (section === 'imoveis') loadProperties()
+        if (section === 'contato') loadMessages()
+    }
 })
 
 // Dashboard
-async function updateDashboard() {
+async function loadDashboard() {
     try {
-        const properties = await supabase.getAllProperties()
+        const properties = await propertiesAPI.getAll()
         const total = properties.length
         const venda = properties.filter(p => p.transaction === 'venda').length
         const aluguel = properties.filter(p => p.transaction === 'aluguel').length
@@ -215,15 +173,15 @@ async function updateDashboard() {
         document.getElementById('imoveisVenda').textContent = venda
         document.getElementById('imoveisAluguel').textContent = aluguel
         document.getElementById('totalVisualizacoes').textContent = Math.floor(Math.random() * 500) + 100
-    } catch (error) {
-        console.error('Error loading dashboard:', error)
+    } catch (err) {
+        console.error('Dashboard error:', err)
     }
 }
 
 // Profile
 async function loadProfile() {
     try {
-        const profile = await supabase.getProfile()
+        const profile = await profileAPI.get()
         if (profile) {
             document.getElementById('nome').value = profile.nome || ''
             document.getElementById('nomeEmpresa').value = profile.nome_empresa || ''
@@ -237,14 +195,13 @@ async function loadProfile() {
             document.getElementById('facebook').value = profile.facebook || ''
             document.getElementById('sobre').value = profile.sobre || ''
         }
-    } catch (error) {
-        console.error('Error loading profile:', error)
+    } catch (err) {
+        console.error('Profile error:', err)
     }
 }
 
-profileForm.addEventListener('submit', async (e) => {
+document.getElementById('profileForm').onsubmit = async (e) => {
     e.preventDefault()
-    
     const profile = {
         nome: document.getElementById('nome').value,
         nome_empresa: document.getElementById('nomeEmpresa').value,
@@ -260,101 +217,62 @@ profileForm.addEventListener('submit', async (e) => {
     }
     
     try {
-        await supabase.updateProfile(profile)
-        showToast('Perfil atualizado com sucesso!', 'success')
-    } catch (error) {
-        showToast('Erro ao salvar perfil: ' + error.message, 'error')
+        await profileAPI.update(profile)
+        showToast('Perfil atualizado!', 'success')
+    } catch (err) {
+        showToast('Erro: ' + err.message, 'error')
     }
-})
+}
 
-// Properties Table
-async function renderPropertiesTable() {
+// Properties
+let currentImages = []
+
+async function loadProperties() {
     try {
-        const properties = await supabase.getAllProperties()
+        const properties = await propertiesAPI.getAll()
         const tbody = document.getElementById('propertiesTableBody')
-        const searchTerm = document.getElementById('searchImoveis').value.toLowerCase()
-        const filterTipo = document.getElementById('filterTipo').value
-        const filterTransacao = document.getElementById('filterTransacao').value
+        const search = document.getElementById('searchImoveis').value.toLowerCase()
+        const tipo = document.getElementById('filterTipo').value
+        const transacao = document.getElementById('filterTransacao').value
         
         let filtered = properties.filter(p => {
-            const matchesSearch = (p.title || '').toLowerCase().includes(searchTerm) || 
-                                 (p.location || '').toLowerCase().includes(searchTerm)
-            const matchesTipo = !filterTipo || p.type === filterTipo
-            const matchesTransacao = !filterTransacao || p.transaction === filterTransacao
-            
-            return matchesSearch && matchesTipo && matchesTransacao
+            const matchSearch = !search || (p.title || '').toLowerCase().includes(search) || (p.location || '').toLowerCase().includes(search)
+            const matchTipo = !tipo || p.type === tipo
+            const matchTransacao = !transacao || p.transaction === transacao
+            return matchSearch && matchTipo && matchTransacao
         })
         
         if (filtered.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                        Nenhum imóvel encontrado
-                    </td>
-                </tr>
-            `
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">Nenhum imóvel</td></tr>'
             return
         }
         
-        tbody.innerHTML = filtered.map(property => `
+        tbody.innerHTML = filtered.map(p => `
             <tr>
-                <td>
-                    <img src="${(property.images && property.images[0]) || 'https://via.placeholder.com/60x45'}" 
-                         alt="${property.title}" 
-                         class="property-img-thumb"
-                         onerror="this.src='https://via.placeholder.com/60x45'">
-                </td>
-                <td>
-                    <strong>${property.title}</strong><br>
-                    <small style="color: var(--text-muted)">${property.location || ''}</small>
-                </td>
-                <td class="type-badge">${property.type || ''}</td>
-                <td>
-                    <span class="status-badge" style="background: ${property.transaction === 'venda' ? 'rgba(46, 204, 113, 0.1)' : 'rgba(52, 152, 219, 0.1)'}; 
-                          color: ${property.transaction === 'venda' ? '#2ecc71' : '#3498db'}">
-                        ${property.transaction === 'venda' ? 'Venda' : 'Aluguel'}
-                    </span>
-                </td>
-                <td>${formatPrice(property.price, property.transaction)}</td>
-                <td>
-                    <span class="status-badge ${property.status}">${property.status}</span>
-                </td>
+                <td><img src="${(p.images && p.images[0]) || 'https://via.placeholder.com/60x45'}" class="property-img-thumb" onerror="this.src='https://via.placeholder.com/60x45'"></td>
+                <td><strong>${p.title || ''}</strong><br><small>${p.location || ''}</small></td>
+                <td>${p.type || ''}</td>
+                <td><span class="status-badge" style="background:${p.transaction==='venda'?'rgba(46,204,113,0.1)':'rgba(52,152,219,0.1)};color:${p.transaction==='venda'?'#2ecc71':'#3498db'}">${p.transaction==='venda'?'Venda':'Aluguel'}</span></td>
+                <td>${formatPrice(p.price, p.transaction)}</td>
+                <td><span class="status-badge ${p.status}">${p.status}</span></td>
                 <td>
                     <div class="action-btns">
-                        <button class="action-btn" onclick="editProperty('${property.id}')" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn" onclick="toggleStatus('${property.id}')" title="${property.status === 'ativo' ? 'Desativar' : 'Ativar'}">
-                            <i class="fas fa-${property.status === 'ativo' ? 'eye-slash' : 'eye'}"></i>
-                        </button>
-                        <button class="action-btn delete" onclick="confirmDelete('${property.id}')" title="Excluir">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <button class="action-btn" onclick="editProperty('${p.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn" onclick="toggleStatus('${p.id}')"><i class="fas fa-${p.status==='ativo'?'eye-slash':'eye'}"></i></button>
+                        <button class="action-btn delete" onclick="confirmDelete('${p.id}')"><i class="fas fa-trash"></i></button>
                     </div>
                 </td>
             </tr>
         `).join('')
-    } catch (error) {
-        console.error('Error loading properties:', error)
+    } catch (err) {
+        console.error('Properties error:', err)
     }
 }
 
-function formatPrice(price, transaction) {
-    if (transaction === 'aluguel') {
-        return 'R$ ' + parseFloat(price || 0).toLocaleString('pt-BR') + '/mês'
-    }
-    return 'R$ ' + parseFloat(price || 0).toLocaleString('pt-BR')
-}
-
-// Filter events
-document.getElementById('searchImoveis').addEventListener('input', renderPropertiesTable)
-document.getElementById('filterTipo').addEventListener('change', renderPropertiesTable)
-document.getElementById('filterTransacao').addEventListener('change', renderPropertiesTable)
-
-// Property Modal
-document.getElementById('addPropertyBtn').addEventListener('click', () => {
-    openPropertyModal()
-})
+document.getElementById('addPropertyBtn').onclick = () => openPropertyModal()
+document.getElementById('searchImoveis').oninput = loadProperties
+document.getElementById('filterTipo').onchange = loadProperties
+document.getElementById('filterTransacao').onchange = loadProperties
 
 function openPropertyModal(property = null) {
     currentImages = property ? (property.images || []) : []
@@ -368,7 +286,6 @@ function openPropertyModal(property = null) {
     document.getElementById('propertyPrice').value = property ? property.price : ''
     document.getElementById('propertyLocation').value = property ? property.location : ''
     document.getElementById('propertyStatus').value = property ? property.status : 'ativo'
-    
     document.getElementById('propertyBedrooms').value = property ? property.bedrooms : 0
     document.getElementById('propertyBathrooms').value = property ? property.bathrooms : 0
     document.getElementById('propertySuites').value = property ? property.suites : 0
@@ -379,70 +296,51 @@ function openPropertyModal(property = null) {
     document.getElementById('propertyCondition').value = property ? property.condition : 'novo'
     document.getElementById('propertyDescription').value = property ? property.description : ''
     
-    // Features
-    document.querySelectorAll('input[name="features"]').forEach(checkbox => {
-        checkbox.checked = property && property.features && property.features.includes(checkbox.value)
+    document.querySelectorAll('input[name="features"]').forEach(cb => {
+        cb.checked = property && property.features && property.features.includes(cb.value)
     })
     
     renderImagePreviews()
-    propertyModal.classList.add('active')
+    document.getElementById('propertyModal').classList.add('active')
 }
 
 async function editProperty(id) {
-    try {
-        const properties = await supabase.getAllProperties()
-        const property = properties.find(p => p.id === id)
-        if (property) {
-            openPropertyModal(property)
-        }
-    } catch (error) {
-        showToast('Erro ao carregar imóvel', 'error')
-    }
+    const properties = await propertiesAPI.getAll()
+    const property = properties.find(p => p.id === id)
+    if (property) openPropertyModal(property)
 }
 
-document.getElementById('closePropertyModal').addEventListener('click', closePropertyModal)
-document.getElementById('cancelProperty').addEventListener('click', closePropertyModal)
-propertyModal.querySelector('.modal-overlay').addEventListener('click', closePropertyModal)
-
 function closePropertyModal() {
-    propertyModal.classList.remove('active')
-    propertyForm.reset()
+    document.getElementById('propertyModal').classList.remove('active')
+    document.getElementById('propertyForm').reset()
     currentImages = []
     renderImagePreviews()
 }
 
-// Form Tabs
+document.getElementById('closePropertyModal').onclick = closePropertyModal
+document.getElementById('cancelProperty').onclick = closePropertyModal
+document.querySelector('#propertyModal .modal-overlay').onclick = closePropertyModal
+
+// Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.onclick = () => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'))
-        
         btn.classList.add('active')
         document.getElementById('tab-' + btn.dataset.tab).classList.add('active')
-    })
+    }
 })
 
 // Image Upload
-uploadZone.addEventListener('click', () => imageInput.click())
+const uploadZone = document.getElementById('uploadZone')
+const imageInput = document.getElementById('imageInput')
+const imagePreviewGrid = document.getElementById('imagePreviewGrid')
 
-uploadZone.addEventListener('dragover', (e) => {
-    e.preventDefault()
-    uploadZone.classList.add('dragover')
-})
-
-uploadZone.addEventListener('dragleave', () => {
-    uploadZone.classList.remove('dragover')
-})
-
-uploadZone.addEventListener('drop', (e) => {
-    e.preventDefault()
-    uploadZone.classList.remove('dragover')
-    handleFiles(e.dataTransfer.files)
-})
-
-imageInput.addEventListener('change', (e) => {
-    handleFiles(e.target.files)
-})
+uploadZone.onclick = () => imageInput.click()
+uploadZone.ondragover = (e) => { e.preventDefault(); uploadZone.classList.add('dragover') }
+uploadZone.ondragleave = () => uploadZone.classList.remove('dragover')
+uploadZone.ondrop = (e) => { e.preventDefault(); uploadZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files) }
+imageInput.onchange = (e) => handleFiles(e.target.files)
 
 function handleFiles(files) {
     Array.from(files).forEach(file => {
@@ -452,8 +350,6 @@ function handleFiles(files) {
                 if (currentImages.length < 10) {
                     currentImages.push(e.target.result)
                     renderImagePreviews()
-                } else {
-                    showToast('Máximo de 10 imagens permitidas', 'warning')
                 }
             }
             reader.readAsDataURL(file)
@@ -461,47 +357,42 @@ function handleFiles(files) {
     })
 }
 
-document.getElementById('addImageUrl').addEventListener('click', () => {
+document.getElementById('addImageUrl').onclick = () => {
     const url = document.getElementById('imageUrl').value
     if (url && currentImages.length < 10) {
         currentImages.push(url)
         document.getElementById('imageUrl').value = ''
         renderImagePreviews()
     }
-})
+}
 
 function renderImagePreviews() {
-    imagePreviewGrid.innerHTML = currentImages.map((img, index) => `
+    imagePreviewGrid.innerHTML = currentImages.map((img, i) => `
         <div class="image-preview-item">
-            <img src="${img}" alt="Preview ${index + 1}" onerror="this.src='https://via.placeholder.com/120'">
-            <button type="button" class="remove-image" onclick="removeImage(${index})">
-                <i class="fas fa-times"></i>
-            </button>
+            <img src="${img}" alt="Preview" onerror="this.src='https://via.placeholder.com/120'">
+            <button type="button" class="remove-image" onclick="removeImage(${i})"><i class="fas fa-times"></i></button>
         </div>
     `).join('')
 }
 
-function removeImage(index) {
-    currentImages.splice(index, 1)
+function removeImage(i) {
+    currentImages.splice(i, 1)
     renderImagePreviews()
 }
 
 // Save Property
-propertyForm.addEventListener('submit', async (e) => {
+document.getElementById('propertyForm').onsubmit = async (e) => {
     e.preventDefault()
     
     const propertyId = document.getElementById('propertyId').value
-    
     const features = []
-    document.querySelectorAll('input[name="features"]:checked').forEach(checkbox => {
-        features.push(checkbox.value)
-    })
+    document.querySelectorAll('input[name="features"]:checked').forEach(cb => features.push(cb.value))
     
-    const propertyData = {
+    const data = {
         title: document.getElementById('propertyTitle').value,
         type: document.getElementById('propertyType').value,
         transaction: document.getElementById('propertyTransaction').value,
-        price: parseFloat(document.getElementById('propertyPrice').value.replace(/\./g, '').replace(',', '.')),
+        price: parseFloat(document.getElementById('propertyPrice').value.replace(/\./g, '').replace(',', '.')) || 0,
         location: document.getElementById('propertyLocation').value,
         status: document.getElementById('propertyStatus').value,
         bedrooms: parseInt(document.getElementById('propertyBedrooms').value) || 0,
@@ -519,138 +410,91 @@ propertyForm.addEventListener('submit', async (e) => {
     
     try {
         if (propertyId) {
-            await supabase.updateProperty(propertyId, propertyData)
-            showToast('Imóvel atualizado com sucesso!', 'success')
+            await propertiesAPI.update(propertyId, data)
+            showToast('Imóvel atualizado!', 'success')
         } else {
-            await supabase.createProperty(propertyData)
-            showToast('Imóvel criado com sucesso!', 'success')
+            await propertiesAPI.create(data)
+            showToast('Imóvel criado!', 'success')
         }
-        
         closePropertyModal()
-        renderPropertiesTable()
-        updateDashboard()
-    } catch (error) {
-        showToast('Erro ao salvar imóvel: ' + error.message, 'error')
+        loadProperties()
+        loadDashboard()
+    } catch (err) {
+        showToast('Erro: ' + err.message, 'error')
     }
-})
+}
 
 // Toggle Status
 async function toggleStatus(id) {
-    try {
-        const properties = await supabase.getAllProperties()
-        const property = properties.find(p => p.id === id)
-        if (property) {
-            const newStatus = property.status === 'ativo' ? 'inativo' : 'ativo'
-            await supabase.updateProperty(id, { status: newStatus })
-            renderPropertiesTable()
-            showToast(`Imóvel ${newStatus === 'ativo' ? 'ativado' : 'desativado'} com sucesso!`, 'success')
-        }
-    } catch (error) {
-        showToast('Erro ao alterar status', 'error')
+    const properties = await propertiesAPI.getAll()
+    const property = properties.find(p => p.id === id)
+    if (property) {
+        const newStatus = property.status === 'ativo' ? 'inativo' : 'ativo'
+        await propertiesAPI.update(id, { status: newStatus })
+        loadProperties()
+        showToast(`Imóvel ${newStatus === 'ativo' ? 'ativado' : 'desativado'}!`, 'success')
     }
 }
 
 // Delete
+let deleteId = null
 function confirmDelete(id) {
-    deletePropertyId = id
-    deleteModal.classList.add('active')
+    deleteId = id
+    document.getElementById('deleteModal').classList.add('active')
 }
 
-document.getElementById('cancelDelete').addEventListener('click', () => {
-    deleteModal.classList.remove('active')
-    deletePropertyId = null
-})
+document.getElementById('cancelDelete').onclick = () => {
+    document.getElementById('deleteModal').classList.remove('active')
+    deleteId = null
+}
 
-document.getElementById('confirmDelete').addEventListener('click', async () => {
-    if (deletePropertyId) {
-        try {
-            await supabase.deleteProperty(deletePropertyId)
-            renderPropertiesTable()
-            updateDashboard()
-            showToast('Imóvel excluído com sucesso!', 'success')
-        } catch (error) {
-            showToast('Erro ao excluir imóvel', 'error')
-        }
+document.getElementById('confirmDelete').onclick = async () => {
+    if (deleteId) {
+        await propertiesAPI.delete(deleteId)
+        loadProperties()
+        loadDashboard()
+        showToast('Imóvel excluído!', 'success')
     }
-    deleteModal.classList.remove('active')
-    deletePropertyId = null
-})
-
-deleteModal.querySelector('.modal-overlay').addEventListener('click', () => {
-    deleteModal.classList.remove('active')
-    deletePropertyId = null
-})
+    document.getElementById('deleteModal').classList.remove('active')
+    deleteId = null
+}
+document.querySelector('#deleteModal .modal-overlay').onclick = () => {
+    document.getElementById('deleteModal').classList.remove('active')
+    deleteId = null
+}
 
 // Messages
-async function renderMessages() {
+async function loadMessages() {
     try {
-        const messages = await supabase.getMessages()
+        const messages = await messagesAPI.getAll()
         const container = document.getElementById('messageList')
         
         if (!messages || messages.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-envelope-open"></i>
-                    <p>Nenhuma mensagem recebida ainda</p>
-                </div>
-            `
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-envelope-open"></i><p>Nenhuma mensagem</p></div>'
             return
         }
         
-        container.innerHTML = messages.map(msg => `
+        container.innerHTML = messages.map(m => `
             <div class="message-item">
-                <div class="message-header">
-                    <strong>${msg.nome}</strong>
-                    <span class="message-date">${new Date(msg.created_at).toLocaleDateString('pt-BR')}</span>
-                </div>
-                <div class="message-meta">
-                    <span>${msg.email}</span>
-                    <span>${msg.telefone || ''}</span>
-                </div>
-                <p class="message-content">${msg.mensagem}</p>
+                <div class="message-header"><strong>${m.nome}</strong><span>${new Date(m.created_at).toLocaleDateString('pt-BR')}</span></div>
+                <div class="message-meta"><span>${m.email}</span><span>${m.telefone||''}</span></div>
+                <p class="message-content">${m.mensagem}</p>
             </div>
         `).join('')
-    } catch (error) {
-        console.error('Error loading messages:', error)
+    } catch (err) {
+        console.error('Messages error:', err)
     }
-}
-
-// Toast
-function showToast(message, type = 'success') {
-    const toast = document.createElement('div')
-    toast.className = `toast ${type}`
-    
-    const icons = {
-        success: 'fa-check-circle',
-        error: 'fa-times-circle',
-        warning: 'fa-exclamation-circle'
-    }
-    
-    toast.innerHTML = `
-        <i class="fas ${icons[type]}"></i>
-        <p>${message}</p>
-        <button class="close-toast"><i class="fas fa-times"></i></button>
-    `
-    
-    toast.querySelector('.close-toast').addEventListener('click', () => {
-        toast.remove()
-    })
-    
-    toastContainer.appendChild(toast)
-    
-    setTimeout(() => {
-        toast.remove()
-    }, 5000)
 }
 
 // Logout
-document.getElementById('logoutBtn').addEventListener('click', signOut)
+document.getElementById('logoutBtn').onclick = signOut
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
-    const isAuthenticated = await checkAuth()
-    if (!isAuthenticated) return
+    const isAuth = await checkAuth()
+    if (!isAuth) return
     
-    updateDashboard()
+    loadDashboard()
     loadProfile()
+    console.log('Admin initialized')
 })
