@@ -1,55 +1,78 @@
 const SUPABASE_URL = 'https://ijwuaztnzrptdoonoglq.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_cagM3vIdKiqcNWo36AHSXg_54A9fTLX'
+const SUPABASE_ANON_KEY = 'sb_publishable_cagM3vIdKiqcNWo36AHSXg_54A9fTLX'
 
 class SupabaseAuth {
     constructor() {
-        this.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+        console.log('SupabaseAuth initializing...')
     }
 
     async signInWithEmail(email, password) {
-        const { data, error } = await this.supabase.auth.signInWithPassword({
-            email,
-            password
-        })
-        return { data, error }
+        console.log('Attempting login with:', email)
+        
+        try {
+            const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({ email, password })
+            })
+            
+            const data = await response.json()
+            console.log('Login response:', data)
+            
+            if (data.access_token) {
+                localStorage.setItem('supabase_token', data.access_token)
+                localStorage.setItem('supabase_user', JSON.stringify(data.user))
+                return { data, error: null }
+            }
+            
+            return { data: null, error: { message: data.error_description || 'Login falhou' } }
+        } catch (error) {
+            console.error('Login error:', error)
+            return { data: null, error }
+        }
     }
 
     async signInWithGoogle() {
-        const { data, error } = await this.supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: window.location.origin + '/adm.html'
-            }
-        })
-        return { data, error }
+        const redirectUrl = encodeURIComponent(window.location.origin + '/adm.html')
+        window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectUrl}`
     }
 
     async signUp(email, password) {
-        const { data, error } = await this.supabase.auth.signUp({
-            email,
-            password
-        })
-        return { data, error }
+        console.log('Attempting signup with:', email)
+        
+        try {
+            const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({ email, password })
+            })
+            
+            const data = await response.json()
+            console.log('Signup response:', data)
+            
+            return { data, error: response.ok ? null : { message: data.msg || 'Erro ao criar conta' } }
+        } catch (error) {
+            console.error('Signup error:', error)
+            return { data: null, error }
+        }
     }
 
     async signOut() {
-        const { error } = await this.supabase.auth.signOut()
-        return { error }
+        localStorage.removeItem('supabase_token')
+        localStorage.removeItem('supabase_user')
     }
 
     async getSession() {
-        const { data: { session }, error } = await this.supabase.auth.getSession()
-        return { session, error }
-    }
-
-    async getUser() {
-        const { data: { user }, error } = await this.supabase.auth.getUser()
-        return { user, error }
-    }
-
-    onAuthStateChange(callback) {
-        return this.supabase.auth.onAuthStateChange(callback)
+        const token = localStorage.getItem('supabase_token')
+        return { session: token ? { access_token: token } : null, error: null }
     }
 }
 
 window.supabaseAuth = new SupabaseAuth()
+console.log('SupabaseAuth ready')
