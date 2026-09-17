@@ -36,7 +36,7 @@ class SupabaseAuth {
     }
 
     async signInWithGoogle() {
-        const redirectUrl = encodeURIComponent(window.location.origin + '/adm.html')
+        const redirectUrl = encodeURIComponent(window.location.origin + '/adm')
         window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectUrl}`
     }
 

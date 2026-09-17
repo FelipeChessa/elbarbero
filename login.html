@@ -156,7 +156,7 @@
             </form>
 
             <p class="back-link">
-                <a href="index.html">← Voltar para o site</a>
+                <a href="/">← Voltar para o site</a>
             </p>
         </div>
     </div>
@@ -181,7 +181,7 @@
 
         // Check if already logged in
         if (localStorage.getItem('supabase_token')) {
-            window.location.href = 'adm.html'
+            window.location.href = '/adm'
         }
 
         // Login
@@ -207,7 +207,7 @@
                 if (data.access_token) {
                     localStorage.setItem('supabase_token', data.access_token)
                     localStorage.setItem('supabase_user', JSON.stringify(data.user))
-                    window.location.href = 'adm.html'
+                    window.location.href = '/adm'
                 } else {
                     showError(data.error_description || 'E-mail ou senha incorretos')
                 }

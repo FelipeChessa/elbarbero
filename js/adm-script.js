@@ -20,7 +20,7 @@ async function signInWithEmail(email, password) {
 async function signOut() {
     localStorage.removeItem('supabase_token')
     localStorage.removeItem('supabase_user')
-    window.location.href = 'login.html'
+    window.location.href = '/login'
 }
 
 async function verifyToken() {
@@ -55,13 +55,13 @@ async function verifyToken() {
 async function checkAuth() {
     const token = localStorage.getItem('supabase_token')
     if (!token) {
-        window.location.href = 'login.html'
+        window.location.href = '/login'
         return false
     }
     
     const isValid = await verifyToken()
     if (!isValid) {
-        window.location.href = 'login.html'
+        window.location.href = '/login'
         return false
     }
     
@@ -99,7 +99,7 @@ async function dbQuery(endpoint, options = {}) {
             console.log('Token expired, redirecting to login...')
             localStorage.removeItem('supabase_token')
             localStorage.removeItem('supabase_user')
-            window.location.href = 'login.html'
+            window.location.href = '/login'
             throw new Error('Session expired')
         }
         
@@ -675,7 +675,7 @@ async function init() {
         }
     } catch (err) {
         console.error('Auth check failed:', err)
-        window.location.href = 'login.html'
+        window.location.href = '/login'
         return
     }
     
