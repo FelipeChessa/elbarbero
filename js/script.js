@@ -308,6 +308,17 @@ if (filterBtns) {
 }
 
 // Modal Functions
+const featureIcons = {
+    piscina: { icon: 'fa-swimming-pool', label: 'Piscina' },
+    churrasqueira: { icon: 'fa-fire', label: 'Churrasqueira' },
+    academia: { icon: 'fa-dumbbell', label: 'Academia' },
+    portaria24h: { icon: 'fa-user-shield', label: 'Portaria 24h' },
+    elevador: { icon: 'fa-building', label: 'Elevador' },
+    varanda: { icon: 'fa-door-open', label: 'Varanda' },
+    areaVerde: { icon: 'fa-leaf', label: 'Área Verde' },
+    playground: { icon: 'fa-child', label: 'Playground' }
+}
+
 function openModal(property) {
     const modalBody = modal.querySelector('.modal-body')
     if (!modalBody) return
@@ -315,6 +326,41 @@ function openModal(property) {
     const imageUrl = property.images && property.images[0] 
         ? property.images[0] 
         : property.image || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80'
+    
+    // Generate features HTML
+    let featuresHTML = `
+        ${property.bedrooms > 0 ? `
+        <div class="modal-feature">
+            <i class="fas fa-bed"></i>
+            <span>${property.bedrooms} Quartos</span>
+        </div>
+        ` : ''}
+        ${property.bathrooms > 0 ? `
+        <div class="modal-feature">
+            <i class="fas fa-bath"></i>
+            <span>${property.bathrooms} Banheiros</span>
+        </div>
+        ` : ''}
+        <div class="modal-feature">
+            <i class="fas fa-ruler-combined"></i>
+            <span>${property.area}m²</span>
+        </div>
+    `
+    
+    // Add amenities/features if exists
+    if (property.features && property.features.length > 0) {
+        property.features.forEach(feature => {
+            const featureInfo = featureIcons[feature]
+            if (featureInfo) {
+                featuresHTML += `
+                    <div class="modal-feature">
+                        <i class="fas ${featureInfo.icon}"></i>
+                        <span>${featureInfo.label}</span>
+                    </div>
+                `
+            }
+        })
+    }
     
     modalBody.innerHTML = `
         <img src="${imageUrl}" alt="${property.title}" class="modal-image" onerror="this.src='https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80'">
@@ -332,22 +378,7 @@ function openModal(property) {
             </div>
             <p class="modal-description">${property.description || 'Descrição não disponível.'}</p>
             <div class="modal-features">
-                ${property.bedrooms > 0 ? `
-                <div class="modal-feature">
-                    <i class="fas fa-bed"></i>
-                    <span>${property.bedrooms} Quartos</span>
-                </div>
-                ` : ''}
-                ${property.bathrooms > 0 ? `
-                <div class="modal-feature">
-                    <i class="fas fa-bath"></i>
-                    <span>${property.bathrooms} Banheiros</span>
-                </div>
-                ` : ''}
-                <div class="modal-feature">
-                    <i class="fas fa-ruler-combined"></i>
-                    <span>${property.area}m²</span>
-                </div>
+                ${featuresHTML}
             </div>
             <div class="modal-actions">
                 <a href="https://wa.me/5511988051435?text=Olá, tenho interesse no imóvel: ${encodeURIComponent(property.title)}" target="_blank" class="btn-primary">
