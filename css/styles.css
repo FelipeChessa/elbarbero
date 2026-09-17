@@ -1649,3 +1649,413 @@ img {
         height: 400px;
     }
 }
+/* ============================================
+   SOBRE PAGE STYLES
+   ============================================ */
+
+.sobre-hero {
+    position: relative;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 20px 80px;
+    overflow: hidden;
+}
+
+.sobre-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a1a 100%);
+}
+
+.sobre-hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+}
+
+.sobre-hero-title {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    font-weight: 700;
+    margin: 20px 0 10px;
+    color: var(--text);
+}
+
+.sobre-hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--accent);
+    font-weight: 500;
+    letter-spacing: 2px;
+}
+
+.sobre-hero-intro {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-top: 15px;
+}
+
+.sobre-main {
+    padding: 100px 20px;
+    background: var(--bg-dark);
+}
+
+.sobre-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 80px;
+    align-items: start;
+}
+
+.sobre-photo-section {
+    position: relative;
+}
+
+.sobre-photo-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 350px;
+    margin: 0 auto;
+}
+
+.sobre-photo {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: 8px;
+    position: relative;
+    z-index: 2;
+}
+
+.sobre-photo-accent {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: -20px;
+    bottom: -20px;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    z-index: 1;
+}
+
+.sobre-creci-badge {
+    position: absolute;
+    bottom: -30px;
+    right: -20px;
+    background: var(--accent);
+    color: var(--primary);
+    padding: 15px 25px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    z-index: 3;
+    box-shadow: 0 10px 30px rgba(201, 169, 110, 0.3);
+}
+
+.sobre-creci-badge i {
+    font-size: 1.5rem;
+}
+
+.sobre-content {
+    padding-top: 20px;
+}
+
+.sobre-section-title {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: var(--text);
+}
+
+.sobre-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-muted);
+    margin-bottom: 25px;
+}
+
+/* Diferenciais */
+.sobre-diferenciais {
+    padding: 100px 20px;
+    background: var(--bg-card);
+}
+
+.sobre-diferenciais .section-title {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.diferenciais-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.diferencial-card {
+    background: var(--bg-dark);
+    padding: 40px 30px;
+    border: 1px solid var(--border);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.diferencial-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-5px);
+}
+
+.diferencial-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(201, 169, 110, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+    color: var(--accent);
+    font-size: 2rem;
+}
+
+.diferencial-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    color: var(--text);
+}
+
+.diferencial-card p {
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* Números */
+.sobre-numeros {
+    padding: 100px 20px;
+    background: var(--bg-dark);
+    text-align: center;
+}
+
+.sobre-numeros .section-title {
+    margin-bottom: 60px;
+}
+
+.numeros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.numero-item {
+    text-align: center;
+}
+
+.numero-value {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 10px;
+}
+
+.numero-label {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+/* Mapa */
+.sobre-mapa {
+    padding: 100px 20px;
+    background: var(--bg-card);
+}
+
+.sobre-mapa .section-tag,
+.sobre-mapa .section-title,
+.sobre-mapa .section-subtitle {
+    text-align: center;
+    opacity: 1;
+    transform: none;
+}
+
+.sobre-mapa .section-subtitle {
+    margin-bottom: 50px;
+}
+
+.mapa-wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(201, 169, 110, 0.3);
+}
+
+.mapa-bairros {
+    max-width: 800px;
+    margin: 50px auto 0;
+    text-align: center;
+}
+
+.mapa-bairros h3 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    color: var(--text);
+}
+
+.bairros-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.bairro-tag {
+    background: rgba(201, 169, 110, 0.1);
+    color: var(--accent);
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 1px solid rgba(201, 169, 110, 0.2);
+}
+
+/* CTA */
+.sobre-cta {
+    padding: 100px 20px;
+    background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a1a 100%);
+    text-align: center;
+}
+
+.cta-title {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: var(--text);
+}
+
+.cta-text {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    max-width: 700px;
+    margin: 0 auto 50px;
+    line-height: 1.7;
+}
+
+.cta-methods {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+.cta-method {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: var(--bg-card);
+    padding: 20px 30px;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    transition: var(--transition);
+}
+
+.cta-method:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+}
+
+.cta-method i {
+    font-size: 2rem;
+    color: var(--accent);
+}
+
+.cta-method-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
+
+.cta-method-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.cta-method.whatsapp:hover {
+    background: #25D366;
+    border-color: #25D366;
+}
+
+.cta-method.whatsapp:hover i {
+    color: white;
+}
+
+.cta-btn {
+    display: inline-block;
+    margin-top: 20px;
+}
+
+/* Navbar Light for Sobre Page */
+.navbar-light {
+    background: var(--bg-dark);
+}
+
+/* Mobile Responsive */
+@media (max-width: 968px) {
+    .sobre-container {
+        grid-template-columns: 1fr;
+        gap: 60px;
+    }
+
+    .sobre-photo-section {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .sobre-hero-title {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .sobre-hero {
+        min-height: 50vh;
+        padding: 100px 20px 60px;
+    }
+
+    .sobre-hero-title {
+        font-size: 2.5rem;
+    }
+
+    .sobre-section-title {
+        font-size: 2rem;
+    }
+
+    .cta-methods {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cta-method {
+        width: 100%;
+        max-width: 350px;
+        justify-content: center;
+    }
+}
