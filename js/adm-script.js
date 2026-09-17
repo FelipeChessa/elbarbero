@@ -1,5 +1,3 @@
-// Supabase Configuration
-const SUPABASE_URL = 'https://ijwuaztnzrptdoonoglq.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_cagM3vIdKiqcNWo36AHSXg_54A9fTLX'
 
 let isInitialized = false
@@ -189,10 +187,13 @@ function initNavigation() {
     const navItems = document.querySelectorAll('.nav-item')
     const adminSections = document.querySelectorAll('.admin-section')
     
+    console.log('Initializing navigation:', navItems.length, 'items,', adminSections.length, 'sections')
+    
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault()
             const section = item.dataset.section
+            console.log('Nav clicked:', section)
             
             navItems.forEach(n => n.classList.remove('active'))
             item.classList.add('active')
@@ -201,6 +202,9 @@ function initNavigation() {
             const targetSection = document.getElementById(section)
             if (targetSection) {
                 targetSection.classList.add('active')
+                console.log('Section activated:', section)
+            } else {
+                console.error('Section not found:', section)
             }
             
             if (section === 'dashboard') loadDashboard()
@@ -651,8 +655,17 @@ window.confirmDelete = confirmDelete
 async function init() {
     console.log('Initializing admin panel...')
     
-    const isAuth = await checkAuth()
-    if (!isAuth) return
+    try {
+        const isAuth = await checkAuth()
+        if (!isAuth) {
+            console.log('Not authenticated, redirecting...')
+            return
+        }
+    } catch (err) {
+        console.error('Auth check failed:', err)
+        window.location.href = 'login.html'
+        return
+    }
     
     initNavigation()
     initPropertiesModal()
