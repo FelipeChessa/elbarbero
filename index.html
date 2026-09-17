@@ -281,13 +281,8 @@
 
     <script src="js/script.js"></script>
     <script>
-        // Auto scroll to properties after 5 seconds and activate "venda" filter
+        // Auto scroll to properties after 5 seconds
         setTimeout(() => {
-            const vendaBtn = document.querySelector('.filter-btn[data-filter="venda"]')
-            if (vendaBtn) {
-                vendaBtn.click()
-            }
-            
             const imoveisSection = document.getElementById('imoveis')
             if (imoveisSection) {
                 imoveisSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
