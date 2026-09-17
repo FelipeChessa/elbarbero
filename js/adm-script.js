@@ -46,6 +46,8 @@ async function verifyToken() {
         return true
     } catch (err) {
         console.error('Token verification failed:', err)
+        localStorage.removeItem('supabase_token')
+        localStorage.removeItem('supabase_user')
         return false
     }
 }
@@ -91,6 +93,16 @@ async function dbQuery(endpoint, options = {}) {
     if (!response.ok) {
         const error = await response.json().catch(() => ({}))
         console.error('DB Error:', error)
+        
+        // Check if JWT expired
+        if (error.message === 'JWT expired' || error.code === 'PGRST301') {
+            console.log('Token expired, redirecting to login...')
+            localStorage.removeItem('supabase_token')
+            localStorage.removeItem('supabase_user')
+            window.location.href = 'login.html'
+            throw new Error('Session expired')
+        }
+        
         throw new Error(error.message || error.error_description || `Request failed: ${response.status}`)
     }
     
