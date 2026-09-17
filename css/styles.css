@@ -1263,6 +1263,52 @@ img {
     object-fit: cover;
 }
 
+.modal-image-container {
+    position: relative;
+}
+
+.modal-image-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.6);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.modal-image-nav:hover {
+    background: var(--accent);
+}
+
+.modal-image-nav.prev {
+    left: 0;
+}
+
+.modal-image-nav.next {
+    right: 0;
+}
+
+.modal-image-counter {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
 .modal-details {
     padding: 40px;
 }

@@ -307,6 +307,9 @@ if (filterBtns) {
     })
 }
 
+let currentImageIndex = 0
+let currentPropertyImages = []
+
 // Modal Functions
 const featureIcons = {
     piscina: { icon: 'fa-swimming-pool', label: 'Piscina' },
@@ -323,9 +326,13 @@ function openModal(property) {
     const modalBody = modal.querySelector('.modal-body')
     if (!modalBody) return
     
-    const imageUrl = property.images && property.images[0] 
-        ? property.images[0] 
-        : property.image || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80'
+    // Store images for navigation
+    currentPropertyImages = property.images && property.images.length > 0 
+        ? property.images 
+        : [property.image || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80']
+    currentImageIndex = 0
+    
+    const imageUrl = currentPropertyImages[0]
     
     // Generate features HTML
     let featuresHTML = `
@@ -362,8 +369,24 @@ function openModal(property) {
         })
     }
     
+    // Image navigation HTML
+    const imageNavHTML = currentPropertyImages.length > 1 ? `
+        <button class="modal-image-nav prev" onclick="prevImage(event)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="modal-image-nav next" onclick="nextImage(event)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        <div class="modal-image-counter">
+            <span id="currentImageNum">1</span> / ${currentPropertyImages.length}
+        </div>
+    ` : ''
+    
     modalBody.innerHTML = `
-        <img src="${imageUrl}" alt="${property.title}" class="modal-image" onerror="this.src='https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80'">
+        <div class="modal-image-container">
+            <img src="${imageUrl}" alt="${property.title}" class="modal-image" id="modalImage" onerror="this.src='https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80'">
+            ${imageNavHTML}
+        </div>
         <div class="modal-details">
             <div class="modal-header">
                 <div>
@@ -397,6 +420,31 @@ function openModal(property) {
     
     modal.classList.add('active')
     document.body.style.overflow = 'hidden'
+}
+
+function prevImage(e) {
+    e.stopPropagation()
+    if (currentPropertyImages.length <= 1) return
+    currentImageIndex = currentImageIndex > 0 ? currentImageIndex - 1 : currentPropertyImages.length - 1
+    updateModalImage()
+}
+
+function nextImage(e) {
+    e.stopPropagation()
+    if (currentPropertyImages.length <= 1) return
+    currentImageIndex = currentImageIndex < currentPropertyImages.length - 1 ? currentImageIndex + 1 : 0
+    updateModalImage()
+}
+
+function updateModalImage() {
+    const img = document.getElementById('modalImage')
+    const counter = document.getElementById('currentImageNum')
+    if (img && currentPropertyImages[currentImageIndex]) {
+        img.src = currentPropertyImages[currentImageIndex]
+    }
+    if (counter) {
+        counter.textContent = currentImageIndex + 1
+    }
 }
 
 function closeModal() {
