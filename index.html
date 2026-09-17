@@ -60,12 +60,12 @@
             <div class="hero-overlay"></div>
         </div>
         <div class="hero-content">
-            <div class="hero-tag">Zona Norte de São Paulo</div>
+            <div class="hero-tag">Crei 161611</div>
             <h1 class="hero-title">
-                <span class="title-line">Imóveis na</span>
-                <span class="title-line accent">Zona Norte</span>
+                <span class="title-line">Seu próximo</span>
+                <span class="title-line accent">imóvel está aqui</span>
             </h1>
-            <p class="hero-subtitle">Apartamentos, casas e comerciais para venda e aluguel</p>
+            <p class="hero-subtitle">Apartamentos, casas e comerciais para venda e aluguel na Zona Norte</p>
             <div class="hero-actions">
                 <a href="#imoveis" class="btn-primary">Ver Imóveis</a>
                 <a href="https://wa.me/5511988051435?text=Olá, gostaria de ver os imóveis disponíveis" target="_blank" class="btn-secondary">
@@ -280,6 +280,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
 
     <script src="js/script.js"></script>
+    <script>
+        // Auto scroll to properties after 5 seconds and activate "venda" filter
+        setTimeout(() => {
+            const vendaBtn = document.querySelector('.filter-btn[data-filter="venda"]')
+            if (vendaBtn) {
+                vendaBtn.click()
+            }
+            
+            const imoveisSection = document.getElementById('imoveis')
+            if (imoveisSection) {
+                imoveisSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }
+        }, 5000)
+    </script>
 </body>
 
 </html>
